@@ -67,10 +67,17 @@ class TelegramNotificationsPlugin(notify.NotificationPlugin):
         ]
 
     def build_message(self, group, event):
-        text = '*[Sentry]* {project_name} {level}\n{url}'.format(**{
+        if group.culprit:
+            culprit = ('\n```' + group.culprit + '```').encode('utf-8')
+        else:
+            culprit = None
+
+        text = '*[Sentry] {level}: {title}*\nProject: {project_name}\n{url}{culprit}'.format(**{
             'project_name': group.project.name,
             'level': event.get_tag('level'),
             'url': group.get_absolute_url(),
+            'title': event.message_short.encode('utf-8'),
+            'culprit': culprit
         })
         return {
             'text': text,
